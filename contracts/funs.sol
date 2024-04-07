@@ -1,51 +1,53 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-contract funs{
+contract funs {
+    mapping(address => uint256) private balances; 
+    address private owner;
 
-    mapping(address => uint256) balances; 
-
-    event Deposit(address indexed owner, uint amount);
-    event Withdraw(address indexed owner, uint amount);
+    event Deposit(address indexed account, uint amount);
+    event Withdraw(address indexed account, uint amount);
     event Transfer(address indexed from, address indexed to, uint amount);
 
-    address owner;
-    
-    modifier onlyowner(){
-        require(owner == msg.sender, "you not the owner");
+    modifier onlyOwner() {
+        require(owner == msg.sender, "Only owner can call this function");
         _;
     }
 
-     function deposit(address _account, uint _number) public payable {
-        balances[_account] += _number;
-        emit Deposit(_account, _number);
+    constructor() {
+        owner = msg.sender;
     }
 
+    function deposit(uint _number) public payable {
+        balances[msg.sender] += _number;
+        emit Deposit(msg.sender, _number);
+    }
 
-    function withdraw(uint amount, address _account, uint _number) public {
-    require(amount <= balances[msg.sender], "Insufficient balance");
-    emit Withdraw(_account, _number);
-    // Withdrawal logic here
-
+    function withdraw(uint _amount) public {
+        require(_amount <= balances[msg.sender], "Insufficient balance");
+        require(_amount > 0, "Withdrawal amount must be greater than 0");
+        balances[msg.sender] -= _amount;
+        emit Withdraw(msg.sender, _amount);
+        // Withdrawal logic here
     }
 
     function add(uint a, uint b) public pure returns (uint) {
-    uint result = a + b;
-    assert(result >= a); // Overflow check
-    return result;
-
+        uint result = a + b;
+        require(result >= a, "SafeMath: addition overflow");
+        return result;
     }
 
-
-
-    function transfer(address _from, address _to, uint _number) public  onlyowner{
-    if (_number > balances[msg.sender]) {
-        revert("Insufficient balance");
+    function transfer(address _to, uint _number) public onlyOwner {
+        require(_number > 0, "Transfer amount must be greater than 0");
+        require(_to != address(0), "Invalid recipient address");
+        require(balances[msg.sender] >= _number, "Insufficient balance");
+        balances[msg.sender] -= _number;
+        balances[_to] += _number;
+        emit Transfer(msg.sender, _to, _number);
+        // Transfer logic here
     }
-    emit Transfer(_from, _to, _number);
-    // Transfer logic here
+
+    function getBalance(address _account) public view returns (uint) {
+        return balances[_account];
     }
-
-
-
 }
