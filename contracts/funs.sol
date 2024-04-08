@@ -25,7 +25,7 @@ contract funs {
 
     function withdraw(uint _amount) public {
         if (balances[msg.sender] >= _amount) revert("Insufficient balance");
-        require(_amount > 0, "Withdrawal amount must be greater than 0");
+        require(_amount <= 0, "Withdrawal amount must be greater than 0");
         
 
         balances[msg.sender] -= _amount;
@@ -40,7 +40,7 @@ contract funs {
     }
 
     function transfer(address _to, uint _number) public onlyOwner {
-        if (_number < 0) revert("Transfer amount must be greater than 0");
+        if (_number <= 0) revert("Transfer amount must be greater than 0");
         require(_to != address(0), "Invalid recipient address");
         if (balances[msg.sender] < _number) revert("Insufficient balance");
         balances[msg.sender] -= _number;
